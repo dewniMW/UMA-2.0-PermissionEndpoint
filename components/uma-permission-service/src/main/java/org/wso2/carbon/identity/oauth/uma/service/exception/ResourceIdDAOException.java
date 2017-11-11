@@ -18,13 +18,16 @@
 
 package org.wso2.carbon.identity.oauth.uma.service.exception;
 
+/**
+ * Custom exception to be thrown when there is an invalid resource id in the permission request.
+ */
 public class ResourceIdDAOException extends Exception {
 
-    public ResourceIdDAOException( String message ){
+    public ResourceIdDAOException(String message) {
         super(message);
     }
 
-    public ResourceIdDAOException ( String message, Throwable throwable){
+    public ResourceIdDAOException(String message, Throwable throwable) {
         super(message, throwable);
     }
 }

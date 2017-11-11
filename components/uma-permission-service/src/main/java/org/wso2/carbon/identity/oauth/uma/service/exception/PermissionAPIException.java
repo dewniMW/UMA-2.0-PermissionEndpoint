@@ -18,6 +18,9 @@
 
 package org.wso2.carbon.identity.oauth.uma.service.exception;
 
+/**
+ * Custom exception to be thrown when there is an issue with database connectivity.
+ */
 public class PermissionAPIException extends Exception {
 
     public PermissionAPIException(String message) {

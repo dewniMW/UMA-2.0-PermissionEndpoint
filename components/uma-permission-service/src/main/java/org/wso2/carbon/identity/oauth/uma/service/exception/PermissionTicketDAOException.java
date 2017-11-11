@@ -18,13 +18,16 @@
 
 package org.wso2.carbon.identity.oauth.uma.service.exception;
 
-public class PermissionTicketDAOException extends Exception{
+/**
+ * Custom exception to be thrown when there is an issue with persisting the permission ticket.
+ */
+public class PermissionTicketDAOException extends Exception {
 
-    public PermissionTicketDAOException( String message ){
+    public PermissionTicketDAOException(String message) {
         super(message);
     }
 
-    public PermissionTicketDAOException ( String message, Throwable throwable){
+    public PermissionTicketDAOException(String message, Throwable throwable) {
         super(message, throwable);
     }
 }

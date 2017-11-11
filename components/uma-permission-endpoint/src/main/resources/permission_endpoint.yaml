@@ -27,29 +27,29 @@ paths:
       tags:
         - Permission Registration
       parameters:
-        - in: header
-          name: PAT
+        - in: query
+          name: resourceOwnerId
           description: >-
-            An access token with the scope uma_protection, used by the resource
-            server as a client of the authorization server's protection API.
+            The resource owner ID is defined to obtain of the list of resources
+            to be retrieved.
           required: true
           type: string
         - in: body
-          name: requested_permission
+          name: requestedPermission
           description: The requested permissions.
           schema:
-            $ref: '#/definitions/ResourceDetails'
+            $ref: '#/definitions/ResourceModel'
       responses:
         '201':
           description: Created
           schema:
-            $ref: '#/definitions/PTSuccess'
+            $ref: '#/definitions/Success'
         '400':
           description: Bad Request
           schema:
-            $ref: '#/definitions/PTFail'
+            $ref: '#/definitions/Error'
 definitions:
-  PTSuccess:
+  Success:
     properties:
       ticket:
         type: string
@@ -57,7 +57,7 @@ definitions:
         example: 016f84e8-f9b9-11e0-bd6f-0021cc6004de
     required:
       - ticket
-  PTFail:
+  Error:
     properties:
       error:
         type: string
@@ -75,7 +75,7 @@ definitions:
         example: 'https://as.example.com/uma_errors/invalid_resource_id'
     required:
       - error
-  ResourceDetails:
+  ResourceModel:
     type: array
     items:
       type: object

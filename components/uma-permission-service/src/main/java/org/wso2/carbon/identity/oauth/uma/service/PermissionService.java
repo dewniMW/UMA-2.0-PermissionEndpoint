@@ -18,17 +18,18 @@
 
 package org.wso2.carbon.identity.oauth.uma.service;
 
-import org.wso2.carbon.identity.oauth.uma.service.exception.PermissionAPIException;
-import org.wso2.carbon.identity.oauth.uma.service.exception.PermissionTicketDAOException;
-import org.wso2.carbon.identity.oauth.uma.service.exception.ResourceIdDAOException;
-import org.wso2.carbon.identity.oauth.uma.service.exception.ResourceScopeDAOException;
-import org.wso2.carbon.identity.oauth.uma.service.model.PermissionTicket;
+import org.wso2.carbon.identity.oauth.uma.service.dao.PermissionTicketDO;
+import org.wso2.carbon.identity.oauth.uma.service.exception.PermissionServiceException;
+import org.wso2.carbon.identity.oauth.uma.service.exception.PermissionServiceRuntimeException;
 import org.wso2.carbon.identity.oauth.uma.service.model.Resource;
 
 import java.util.List;
 
+/**
+ * PermissionService is the service interface used for permission registration.
+ */
 public interface PermissionService {
 
-    PermissionTicket issuePermissionTicket(List<Resource> resourceList) throws PermissionTicketDAOException,
-            PermissionAPIException, ResourceIdDAOException, ResourceScopeDAOException;
+    PermissionTicketDO issuePermissionTicket(List<Resource> resourceList) throws PermissionServiceRuntimeException,
+            PermissionServiceException;
 }

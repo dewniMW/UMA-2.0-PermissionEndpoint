@@ -21,6 +21,9 @@ package org.wso2.carbon.identity.oauth.uma.service.model;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This class holds details related resource.
+ */
 public class Resource {
 
     private String resourceId;

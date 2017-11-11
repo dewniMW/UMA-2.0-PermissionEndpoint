@@ -23,8 +23,6 @@ import org.wso2.carbon.identity.oauth.uma.service.exception.PermissionAPIExcepti
 import org.wso2.carbon.identity.oauth.uma.service.exception.PermissionTicketDAOException;
 import org.wso2.carbon.identity.oauth.uma.service.exception.ResourceIdDAOException;
 import org.wso2.carbon.identity.oauth.uma.service.exception.ResourceScopeDAOException;
-import org.wso2.carbon.identity.oauth.uma.service.model.PermissionTicket;
-import org.wso2.carbon.identity.oauth.uma.service.model.PermissionTicketImpl;
 import org.wso2.carbon.identity.oauth.uma.service.model.Resource;
 
 import java.sql.Connection;
@@ -32,8 +30,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 
 /**
  * Data Access Layer functionality for Permission Endpoint. This includes storing requested permissions
@@ -42,37 +40,31 @@ import java.util.UUID;
 public class PermissionTicketDAO {
 
     /**
-     * Issue a permission ticket.
+     * Issue a permission ticket. Permission ticket represents the resources requested by the resource server on
+     * client's behalf
      *
      * @param resourceList A list with the resource ids and the corresponding scopes.
-     * @return PermissionTicket
-     * @throws PermissionAPIException
-     * @throws PermissionTicketDAOException
-     * @throws ResourceIdDAOException
-     * @throws ResourceScopeDAOException
+     * @throws PermissionAPIException       Exception thrown when there is an issue with the database connection.
+     * @throws PermissionTicketDAOException Exception thrown when there is an issue persisting the permission ticket.
+     * @throws ResourceIdDAOException       Exception thrown when there is an invalid resource id.
+     * @throws ResourceScopeDAOException    Exception thrown when there is an invalid resource scope.
      */
-    public PermissionTicket issue(List<Resource> resourceList) throws PermissionAPIException,
-            PermissionTicketDAOException, ResourceIdDAOException, ResourceScopeDAOException {
 
-        PermissionTicket permissionTicketImpl = new PermissionTicketImpl();
-
-        // Generate PT String.
-        String ticketString = UUID.randomUUID().toString();
-        permissionTicketImpl.setTicket(ticketString);
-        Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-        permissionTicketImpl.setCreatedTime(timestamp);
-        permissionTicketImpl.setValidityPeriod(3600000);
-        permissionTicketImpl.setStatus("ACTIVE");
+    public void persist(List<Resource> resourceList, PermissionTicketDO permissionTicketDO) throws
+            PermissionAPIException, PermissionTicketDAOException, ResourceIdDAOException, ResourceScopeDAOException {
 
         // Persist ticket related details.
         try (Connection connection = IdentityDatabaseUtil.getDBConnection()) {
-
             connection.setAutoCommit(false);
-            try (PreparedStatement preparedStatement = connection.prepareStatement(SQLQueries.STORE_PT_QUERY)) {
-                preparedStatement.setString(1, permissionTicketImpl.getTicket());
-                preparedStatement.setTimestamp(2, permissionTicketImpl.getCreatedTime());
-                preparedStatement.setLong(3, permissionTicketImpl.getValidityPeriod());
-                preparedStatement.setString(4, permissionTicketImpl.getStatus());
+            try (PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO " +
+                    "IDN_PERMISSION_TICKET (PT, TIME_CREATED, VALIDITY_PERIOD, TICKET_STATE) VALUES (?,?,?,?)")) {
+                preparedStatement.setString(1, permissionTicketDO.getTicket());
+                /*preparedStatement.setTimestamp(2, permissionTicketDO.getTimestamp(),
+                        permissionTicketDO.getCreatedTime());*/
+                preparedStatement.setTimestamp(2, new Timestamp(new Date().getTime()),
+                        permissionTicketDO.getCreatedTime());
+                preparedStatement.setLong(3, permissionTicketDO.getValidityPeriod());
+                preparedStatement.setString(4, permissionTicketDO.getStatus());
 
                 preparedStatement.execute();
 
@@ -82,21 +74,23 @@ public class PermissionTicketDAO {
                     if (resultSet.next()) {
                         id = resultSet.getLong(1);
                     } else {
-                        connection.rollback();
                         throw new PermissionTicketDAOException("Failed to persist Permission Ticket.");
                     }
                 }
 
                 for (Resource resource : resourceList) {
-                    try (PreparedStatement preparedStatement1 = connection.prepareStatement(SQLQueries.STORE_PT_RESOURCE_IDS_QUERY)) {
-                        preparedStatement1.setString(1, resource.getResourceId());
-                        preparedStatement1.setLong(2, id);
-                        preparedStatement1.execute();
+                    try (PreparedStatement resourceIdStatement = connection.prepareStatement("INSERT INTO " +
+                            "IDN_PT_RESOURCE (PT_RESOURCE_ID, PT_ID) VALUES ((SELECT ID FROM IDN_RESOURCE WHERE " +
+                            "RESOURCE_ID = ?), ?)")) {
+                        resourceIdStatement.setString(1, resource.getResourceId());
+                        resourceIdStatement.setLong(2, id);
+                        resourceIdStatement.execute();
 
-                        try (ResultSet resultSet = preparedStatement1.getGeneratedKeys()) {
+                        try (ResultSet resultSet = resourceIdStatement.getGeneratedKeys()) {
                             if (resultSet.next()) {
-                                try (PreparedStatement resourceScopeStatement = connection.prepareStatement(SQLQueries
-                                        .STORE_PT_RESOURCE_SCOPES_QUERY)) {
+                                try (PreparedStatement resourceScopeStatement = connection.prepareStatement
+                                        ("INSERT INTO IDN_PT_RESOURCE_SCOPE (PT_RESOURCE_ID, PT_SCOPE_ID) VALUES " +
+                                                "(?, (SELECT SCOPE_ID FROM IDN_OAUTH2_SCOPE WHERE NAME = ?))")) {
                                     long resourceId = resultSet.getLong(1);
                                     for (String scope : resource.getResourceScopes()) {
                                         resourceScopeStatement.setLong(1, resourceId);
@@ -106,11 +100,11 @@ public class PermissionTicketDAO {
                                     resourceScopeStatement.executeBatch();
                                 }
                             }
-                        } catch (SQLException e){
-                            throw new ResourceScopeDAOException("Failed to persist resource scopes.",e);
+                        } catch (SQLException e) {
+                            throw new ResourceScopeDAOException("Failed to persist resource scopes.", e);
                         }
-                    } catch (SQLException e){
-                        throw new ResourceIdDAOException("Failed to persist resource Id.",e);
+                    } catch (SQLException e) {
+                        throw new ResourceIdDAOException("Failed to persist resource Id.", e);
                     }
                 }
             }
@@ -118,7 +112,5 @@ public class PermissionTicketDAO {
         } catch (SQLException e) {
             throw new PermissionAPIException("Error occurred while storing PT details.", e);
         }
-        return permissionTicketImpl;
     }
-
 }

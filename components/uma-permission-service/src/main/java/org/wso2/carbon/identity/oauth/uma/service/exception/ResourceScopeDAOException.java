@@ -18,13 +18,16 @@
 
 package org.wso2.carbon.identity.oauth.uma.service.exception;
 
+/**
+ * Custom exception to be thrown when there is an invalid resource scope in the permission request.
+ */
 public class ResourceScopeDAOException extends Exception {
 
-    public ResourceScopeDAOException( String message ){
+    public ResourceScopeDAOException(String message) {
         super(message);
     }
 
-    public ResourceScopeDAOException ( String message, Throwable throwable){
+    public ResourceScopeDAOException(String message, Throwable throwable) {
         super(message, throwable);
     }
 

@@ -24,15 +24,16 @@ import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.identity.oauth.uma.service.PermissionService;
 import org.wso2.carbon.identity.oauth.uma.service.impl.PermissionServiceImpl;
 
+/**
+ * Service component for UMA permission endpoint.
+ */
 @Component(name = "org.wso2.carbon.identity.oauth.uma.service.internal.PermissionServiceComponent",
            immediate = true)
 public class PermissionServiceComponent {
 
     @Activate
     protected void activate(BundleContext bundleContext) {
-
         bundleContext.registerService(PermissionService.class.getName(), new PermissionServiceImpl(), null);
-
     }
 
 }
