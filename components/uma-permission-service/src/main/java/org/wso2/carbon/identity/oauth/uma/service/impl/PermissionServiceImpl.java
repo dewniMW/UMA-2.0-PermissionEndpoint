@@ -68,7 +68,7 @@ public class PermissionServiceImpl implements PermissionService {
         try {
             permissionTicketDAO.persist(resourceList, permissionTicketDO);
         } catch (UMAResourceException e){
-            //throw new UMAClientException(400, e.getErrorCode(), e.getMessageyo(), e);
+            //throw new UMAClientException(400, e.getErrorCode(), e.getMessage(), e);
             throw new UMAClientException( e.getCode(),e.getMessage(), e);
         } catch (PermissionDAOException e) {
             //throw new UMAServerException(e.getMessage(),e);

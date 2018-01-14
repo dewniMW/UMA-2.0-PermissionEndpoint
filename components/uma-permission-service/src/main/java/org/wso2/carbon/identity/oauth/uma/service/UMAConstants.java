@@ -25,41 +25,7 @@ public class UMAConstants {
 
     public static final String UMA_PERMISSION_ENDPOINT_CONFIG_PATH = "ptDetails.properties";
 
-
-    /**
-     * Contains the values to be sent in body of the response as a JSON Result as specified in spec when an error
-     * occurs.
-     */
-    public enum ErrorCodes {
-        invalid_resource_id,
-        invalid_scope;
-    }
-
-    /**
-     * Contains error messages to be logged when an invalid body parameter is sent in the request body.
-     */
     public enum ErrorMessages {
-
-        ERROR_MESSAGE_INVALID_RESOURCE_ID("Permission request failed with bad resource ID."),
-        ERROR_MESSAGE_INVALID_RESOURCE_SCOPE("Permission request failed with bad resource scope."),
-        ERROR_MESSAGE_PERSISTING_PT_DETAILS("Error occurred while storing PT details."),
-        ERROR_MESSAGE_PERSISTING_PT("Error occurred while persisting PT.");
-
-
-        private final String message;
-
-        ErrorMessages(String message) {
-            this.message = message;
-        }
-
-        public String getMessage() {
-            return message;
-        }
-
-    }
-
-
-    public enum ErrorMessage {
         ERROR_BAD_REQUEST_INVALID_RESOURCE_ID("6001","Permission request failed with bad resource ID."),
         ERROR_BAD_REQUEST_INVALID_RESOURCE_SCOPE("6002", "Permission request failed with bad resource scope."),
         ERROR_INTERNAL_SERVER_ERROR_FAILED_TO_PERSIST_PT("6003", "Error occurred while persisting PT."),
@@ -67,13 +33,13 @@ public class UMAConstants {
         ERROR_UNEXPECTED("6005", "Unexpected error.");
 
         private final String code;
-        private final String messageyo;
+        private final String message;
 
 
-        ErrorMessage(String code, String messageyo) {
+        ErrorMessages(String code, String message) {
 
             this.code = code;
-            this.messageyo = messageyo;
+            this.message = message;
         }
 
         public String getCode() {
@@ -81,15 +47,15 @@ public class UMAConstants {
             return this.code;
         }
 
-        public String getMessageyo() {
+        public String getMessage() {
 
-            return this.messageyo;
+            return this.message;
         }
 
         @Override
         public String toString() {
 
-            return code + " - " + messageyo;
+            return code + " - " + message;
         }
 
     }

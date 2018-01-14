@@ -33,14 +33,14 @@ public class PermissionTicketDAOException extends UMAException {
         super(message, throwable);
     }
 
-    public PermissionTicketDAOException (UMAConstants.ErrorMessage errorMessage, Throwable throwable){
-        super(errorMessage.getMessageyo(), throwable);
+    public PermissionTicketDAOException (UMAConstants.ErrorMessages errorMessage, Throwable throwable){
+        super(errorMessage.getMessage(), throwable);
         this.setCode(errorMessage.getCode());
 
     }
 
-    public PermissionTicketDAOException (UMAConstants.ErrorMessage errorMessage){
-        super(errorMessage.getMessageyo());
+    public PermissionTicketDAOException (UMAConstants.ErrorMessages errorMessage){
+        super(errorMessage.getMessage());
         this.setCode(errorMessage.getCode());
 
     }

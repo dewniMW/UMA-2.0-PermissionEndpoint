@@ -76,7 +76,7 @@ public class PermissionTicketDAO {
                         id = resultSet.getLong(1);
                     } else {
                         /*throw new PermissionDAOException(UMAConstants.ErrorMessages.ERROR_MESSAGE_PERSISTING_PT.toString());*/
-                        throw new PermissionTicketDAOException(UMAConstants.ErrorMessage.ERROR_INTERNAL_SERVER_ERROR_FAILED_TO_PERSIST_PT);
+                        throw new PermissionTicketDAOException(UMAConstants.ErrorMessages.ERROR_INTERNAL_SERVER_ERROR_FAILED_TO_PERSIST_PT);
                     }
                 }
 
@@ -105,18 +105,18 @@ public class PermissionTicketDAO {
                         } catch (SQLException e) {
                             /*throw new UMAResourceException(UMAConstants.ErrorCodes.invalid_scope.toString(),
                                     UMAConstants.ErrorMessages.ERROR_MESSAGE_INVALID_RESOURCE_SCOPE, e);*/
-                            /*throw new UMAResourceException(UMAConstants.ErrorMessage.ERROR_BAD_REQUEST_INVALID_RESOURCE_SCOPE.getCode(),
-                                    UMAConstants.ErrorMessage.ERROR_BAD_REQUEST_INVALID_RESOURCE_SCOPE.getMessageyo(),e);*/
-                            throw new UMAResourceException(UMAConstants.ErrorMessage.ERROR_BAD_REQUEST_INVALID_RESOURCE_SCOPE, e);
+                            /*throw new UMAResourceException(UMAConstants.ErrorMessages.ERROR_BAD_REQUEST_INVALID_RESOURCE_SCOPE.getCode(),
+                                    UMAConstants.ErrorMessages.ERROR_BAD_REQUEST_INVALID_RESOURCE_SCOPE.getMessage(),e);*/
+                            throw new UMAResourceException(UMAConstants.ErrorMessages.ERROR_BAD_REQUEST_INVALID_RESOURCE_SCOPE, e);
 
 
                         }
                     } catch (SQLException e) {
                         /*throw new UMAResourceException(UMAConstants.ErrorCodes.invalid_resource_id.toString(),
                                 UMAConstants.ErrorMessages.ERROR_MESSAGE_INVALID_RESOURCE_ID, e);*/
-                        /*throw new UMAResourceException(UMAConstants.ErrorMessage.ERROR_BAD_REQUEST_INVALID_RESOURCE_ID.getCode(),
-                                UMAConstants.ErrorMessage.ERROR_BAD_REQUEST_INVALID_RESOURCE_ID.getMessageyo(),e);*/
-                        throw new UMAResourceException(UMAConstants.ErrorMessage.ERROR_BAD_REQUEST_INVALID_RESOURCE_ID, e);
+                        /*throw new UMAResourceException(UMAConstants.ErrorMessages.ERROR_BAD_REQUEST_INVALID_RESOURCE_ID.getCode(),
+                                UMAConstants.ErrorMessages.ERROR_BAD_REQUEST_INVALID_RESOURCE_ID.getMessage(),e);*/
+                        throw new UMAResourceException(UMAConstants.ErrorMessages.ERROR_BAD_REQUEST_INVALID_RESOURCE_ID, e);
                     }
                 }
             }
@@ -124,7 +124,7 @@ public class PermissionTicketDAO {
         } catch (SQLException e) {
             /*throw new PermissionDAOException(UMAConstants.ErrorMessages.ERROR_MESSAGE_PERSISTING_PT_DETAILS.getMessage(),
                     e);*/
-            throw new PermissionDAOException(UMAConstants.ErrorMessage.ERROR_INTERNAL_SERVER_ERROR_FAILED_TO_PERSIST_PT_DETAILS,
+            throw new PermissionDAOException(UMAConstants.ErrorMessages.ERROR_INTERNAL_SERVER_ERROR_FAILED_TO_PERSIST_PT_DETAILS,
                     e);
         }
     }

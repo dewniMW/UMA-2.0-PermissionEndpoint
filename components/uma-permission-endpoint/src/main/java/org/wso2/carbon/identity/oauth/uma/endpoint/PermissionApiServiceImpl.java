@@ -122,7 +122,7 @@ public class PermissionApiServiceImpl extends PermissionApiService {
         if (throwable instanceof UMAException) {
             code = ((UMAException) throwable).getCode();
         } else {
-            code = UMAConstants.ErrorMessage.ERROR_UNEXPECTED.getCode();
+            code = UMAConstants.ErrorMessages.ERROR_UNEXPECTED.getCode();
         }
 
         if (isServerException) {

@@ -50,8 +50,8 @@ public class UMAResourceException extends UMAException {
         this.setErrorCode(errorCode);
     }*/
 
-    public UMAResourceException (UMAConstants.ErrorMessage errorMessage, Throwable throwable){
-        super(errorMessage.getMessageyo(), throwable);
+    public UMAResourceException (UMAConstants.ErrorMessages errorMessage, Throwable throwable){
+        super(errorMessage.getMessage(), throwable);
         this.setCode(errorMessage.getCode());
 
     }
@@ -64,9 +64,9 @@ public class UMAResourceException extends UMAException {
 
         String errorDescription;
         if (StringUtils.isNotBlank(data)) {
-            errorDescription = String.format(error.getMessageyo(), data);
+            errorDescription = String.format(error.getMessage(), data);
         } else {
-            errorDescription = error.getMessageyo();
+            errorDescription = error.getMessage();
         }
 
         return IdentityException.error(DCRMClientException.class, error.toString(), errorDescription);
