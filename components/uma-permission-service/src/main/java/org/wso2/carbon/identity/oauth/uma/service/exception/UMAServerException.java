@@ -19,15 +19,29 @@
 package org.wso2.carbon.identity.oauth.uma.service.exception;
 
 /**
- * Custom exception to be thrown when there is an issue with database connectivity.
+ * UMA custom exception for internal server errors.
  */
-public class PermissionAPIException extends Exception {
+public class UMAServerException extends UMAException {
 
-    public PermissionAPIException(String message) {
+    public UMAServerException(String message) {
         super(message);
     }
 
-    public PermissionAPIException(String message, Throwable throwable) {
+    public UMAServerException(Throwable throwable) {
+        super(throwable);
+    }
+
+    public UMAServerException(String message, Throwable throwable) {
         super(message, throwable);
+    }
+
+    /*public UMAServerException(int statusCode, String message, Throwable throwable){
+        super(message, throwable);
+        this.setStatusCode(statusCode);
+    }*/
+
+    public UMAServerException(String code, String message, Throwable throwable){
+        super(message, throwable);
+        this.setCode(code);
     }
 }

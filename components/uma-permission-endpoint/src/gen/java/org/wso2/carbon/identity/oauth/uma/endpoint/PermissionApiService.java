@@ -5,6 +5,6 @@ import org.wso2.carbon.identity.oauth.uma.endpoint.dto.ResourceModelDTO;
 import javax.ws.rs.core.Response;
 
 public abstract class PermissionApiService {
-    public abstract Response registerPermission(String resourceOwnerId,ResourceModelDTO requestedPermission);
+    public abstract Response requestPermission(String PAT,ResourceModelDTO requestedPermission);
 }
 

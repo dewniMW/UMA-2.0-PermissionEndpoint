@@ -11,7 +11,7 @@ import javax.validation.constraints.NotNull;
 
 
 @ApiModel(description = "")
-public class ErrorDTO  {
+public class ErrorResponseDTO  {
   
   
   @NotNull
@@ -19,9 +19,6 @@ public class ErrorDTO  {
   
   
   private String errorDescription = null;
-  
-  
-  private String errorUri = null;
 
   
   /**
@@ -38,9 +35,9 @@ public class ErrorDTO  {
 
   
   /**
-   * Human-readable text providing additional information.
+   * Additional information about the error.
    **/
-  @ApiModelProperty(value = "Human-readable text providing additional information.")
+  @ApiModelProperty(value = "Additional information about the error.")
   @JsonProperty("errorDescription")
   public String getErrorDescription() {
     return errorDescription;
@@ -50,28 +47,14 @@ public class ErrorDTO  {
   }
 
   
-  /**
-   * A URI identifying a human-readable web page with information about the error.
-   **/
-  @ApiModelProperty(value = "A URI identifying a human-readable web page with information about the error.")
-  @JsonProperty("errorUri")
-  public String getErrorUri() {
-    return errorUri;
-  }
-  public void setErrorUri(String errorUri) {
-    this.errorUri = errorUri;
-  }
-
-  
 
   @Override
   public String toString()  {
     StringBuilder sb = new StringBuilder();
-    sb.append("class ErrorDTO {\n");
+    sb.append("class ErrorResponseDTO {\n");
     
     sb.append("  error: ").append(error).append("\n");
     sb.append("  errorDescription: ").append(errorDescription).append("\n");
-    sb.append("  errorUri: ").append(errorUri).append("\n");
     sb.append("}\n");
     return sb.toString();
   }

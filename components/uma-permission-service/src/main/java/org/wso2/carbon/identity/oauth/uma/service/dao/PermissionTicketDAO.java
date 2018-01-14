@@ -19,10 +19,11 @@
 package org.wso2.carbon.identity.oauth.uma.service.dao;
 
 import org.wso2.carbon.identity.core.util.IdentityDatabaseUtil;
-import org.wso2.carbon.identity.oauth.uma.service.exception.PermissionAPIException;
+import org.wso2.carbon.identity.oauth.uma.service.UMAConstants;
+import org.wso2.carbon.identity.oauth.uma.service.exception.PermissionDAOException;
 import org.wso2.carbon.identity.oauth.uma.service.exception.PermissionTicketDAOException;
-import org.wso2.carbon.identity.oauth.uma.service.exception.ResourceIdDAOException;
-import org.wso2.carbon.identity.oauth.uma.service.exception.ResourceScopeDAOException;
+import org.wso2.carbon.identity.oauth.uma.service.exception.UMAResourceException;
+import org.wso2.carbon.identity.oauth.uma.service.model.PermissionTicketDO;
 import org.wso2.carbon.identity.oauth.uma.service.model.Resource;
 
 import java.sql.Connection;
@@ -44,14 +45,14 @@ public class PermissionTicketDAO {
      * client's behalf
      *
      * @param resourceList A list with the resource ids and the corresponding scopes.
-     * @throws PermissionAPIException       Exception thrown when there is an issue with the database connection.
+     * @throws PermissionDAOException       Exception thrown when there is an issue with the database connection.
      * @throws PermissionTicketDAOException Exception thrown when there is an issue persisting the permission ticket.
-     * @throws ResourceIdDAOException       Exception thrown when there is an invalid resource id.
-     * @throws ResourceScopeDAOException    Exception thrown when there is an invalid resource scope.
+     * @throws UMAResourceException    Exception thrown when there is an invalid resource ID/scope.
      */
 
-    public void persist(List<Resource> resourceList, PermissionTicketDO permissionTicketDO) throws
-            PermissionAPIException, PermissionTicketDAOException, ResourceIdDAOException, ResourceScopeDAOException {
+
+    public void persist(List<Resource> resourceList, PermissionTicketDO permissionTicketDO) throws UMAResourceException,
+            PermissionDAOException, PermissionTicketDAOException {
 
         // Persist ticket related details.
         try (Connection connection = IdentityDatabaseUtil.getDBConnection()) {
@@ -74,7 +75,8 @@ public class PermissionTicketDAO {
                     if (resultSet.next()) {
                         id = resultSet.getLong(1);
                     } else {
-                        throw new PermissionTicketDAOException("Failed to persist Permission Ticket.");
+                        /*throw new PermissionDAOException(UMAConstants.ErrorMessages.ERROR_MESSAGE_PERSISTING_PT.toString());*/
+                        throw new PermissionTicketDAOException(UMAConstants.ErrorMessage.ERROR_INTERNAL_SERVER_ERROR_FAILED_TO_PERSIST_PT);
                     }
                 }
 
@@ -101,16 +103,29 @@ public class PermissionTicketDAO {
                                 }
                             }
                         } catch (SQLException e) {
-                            throw new ResourceScopeDAOException("Failed to persist resource scopes.", e);
+                            /*throw new UMAResourceException(UMAConstants.ErrorCodes.invalid_scope.toString(),
+                                    UMAConstants.ErrorMessages.ERROR_MESSAGE_INVALID_RESOURCE_SCOPE, e);*/
+                            /*throw new UMAResourceException(UMAConstants.ErrorMessage.ERROR_BAD_REQUEST_INVALID_RESOURCE_SCOPE.getCode(),
+                                    UMAConstants.ErrorMessage.ERROR_BAD_REQUEST_INVALID_RESOURCE_SCOPE.getMessageyo(),e);*/
+                            throw new UMAResourceException(UMAConstants.ErrorMessage.ERROR_BAD_REQUEST_INVALID_RESOURCE_SCOPE, e);
+
+
                         }
                     } catch (SQLException e) {
-                        throw new ResourceIdDAOException("Failed to persist resource Id.", e);
+                        /*throw new UMAResourceException(UMAConstants.ErrorCodes.invalid_resource_id.toString(),
+                                UMAConstants.ErrorMessages.ERROR_MESSAGE_INVALID_RESOURCE_ID, e);*/
+                        /*throw new UMAResourceException(UMAConstants.ErrorMessage.ERROR_BAD_REQUEST_INVALID_RESOURCE_ID.getCode(),
+                                UMAConstants.ErrorMessage.ERROR_BAD_REQUEST_INVALID_RESOURCE_ID.getMessageyo(),e);*/
+                        throw new UMAResourceException(UMAConstants.ErrorMessage.ERROR_BAD_REQUEST_INVALID_RESOURCE_ID, e);
                     }
                 }
             }
             connection.commit();
         } catch (SQLException e) {
-            throw new PermissionAPIException("Error occurred while storing PT details.", e);
+            /*throw new PermissionDAOException(UMAConstants.ErrorMessages.ERROR_MESSAGE_PERSISTING_PT_DETAILS.getMessage(),
+                    e);*/
+            throw new PermissionDAOException(UMAConstants.ErrorMessage.ERROR_INTERNAL_SERVER_ERROR_FAILED_TO_PERSIST_PT_DETAILS,
+                    e);
         }
     }
 }

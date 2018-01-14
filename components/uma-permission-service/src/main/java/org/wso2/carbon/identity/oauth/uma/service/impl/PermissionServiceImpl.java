@@ -22,17 +22,16 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.identity.oauth.uma.service.PermissionService;
 import org.wso2.carbon.identity.oauth.uma.service.ReadPropertiesFile;
-import org.wso2.carbon.identity.oauth.uma.service.UMAConstants;
 import org.wso2.carbon.identity.oauth.uma.service.dao.PermissionTicketDAO;
-import org.wso2.carbon.identity.oauth.uma.service.dao.PermissionTicketDO;
-import org.wso2.carbon.identity.oauth.uma.service.exception.PermissionAPIException;
-import org.wso2.carbon.identity.oauth.uma.service.exception.PermissionServiceException;
-import org.wso2.carbon.identity.oauth.uma.service.exception.PermissionServiceRuntimeException;
+import org.wso2.carbon.identity.oauth.uma.service.exception.PermissionDAOException;
 import org.wso2.carbon.identity.oauth.uma.service.exception.PermissionTicketDAOException;
-import org.wso2.carbon.identity.oauth.uma.service.exception.ResourceIdDAOException;
-import org.wso2.carbon.identity.oauth.uma.service.exception.ResourceScopeDAOException;
+import org.wso2.carbon.identity.oauth.uma.service.exception.UMAServerException;
+import org.wso2.carbon.identity.oauth.uma.service.exception.UMAClientException;
+import org.wso2.carbon.identity.oauth.uma.service.exception.UMAResourceException;
+import org.wso2.carbon.identity.oauth.uma.service.model.PermissionTicketDO;
 import org.wso2.carbon.identity.oauth.uma.service.model.PermissionTicketValues;
 import org.wso2.carbon.identity.oauth.uma.service.model.Resource;
+import org.wso2.carbon.identity.xacmlEXP1.impl.XACMLBasedAuthorization;
 
 import java.util.Calendar;
 import java.util.List;
@@ -49,12 +48,10 @@ public class PermissionServiceImpl implements PermissionService {
     private PermissionTicketDAO permissionTicketDAO = new PermissionTicketDAO();
 
     @Override
-    public PermissionTicketDO issuePermissionTicket(List<Resource> resourceList) throws PermissionServiceException,
-            PermissionServiceRuntimeException {
+    public PermissionTicketDO issuePermissionTicket(List<Resource> resourceList) throws UMAClientException, UMAServerException {
 
         /*PermissionTicketDAO permissionTicketDAO = new PermissionTicketDAO();*/
         PermissionTicketDO permissionTicketDO = new PermissionTicketDO();
-        PermissionServiceException permissionServiceException;
 
         PermissionTicketValues permissionTicketValues = new PermissionTicketValues();
 
@@ -67,29 +64,29 @@ public class PermissionServiceImpl implements PermissionService {
         permissionTicketDO.setValidityPeriod(permissionTicketValues.getValidityPeriod());
         permissionTicketDO.setStatus(permissionTicketValues.getStatus());
 
+
         try {
             permissionTicketDAO.persist(resourceList, permissionTicketDO);
-        } catch (PermissionAPIException e) {
-            log.error("Internal server error occurred. ", e);
-            throw new PermissionServiceRuntimeException("Error occurred while persisting permission ticket and " +
-                    "requested permissions.", e);
+        } catch (UMAResourceException e){
+            //throw new UMAClientException(400, e.getErrorCode(), e.getMessageyo(), e);
+            throw new UMAClientException( e.getCode(),e.getMessage(), e);
+        } catch (PermissionDAOException e) {
+            //throw new UMAServerException(e.getMessage(),e);
+            throw new UMAServerException(e.getCode(), e.getMessage(),e);
         } catch (PermissionTicketDAOException e) {
-            log.error("Internal server error occurred. ", e);
-            throw new PermissionServiceRuntimeException("Error occurred while persisting permission ticket and " +
-                    "requested permissions.", e);
-        } catch (ResourceIdDAOException e) {
-            log.error(UMAConstants.ErrorMessages.ERROR_MESSAGE_INVALID_RESOURCE_ID, e);
-            permissionServiceException = new PermissionServiceException("Error occurred while persisting permission " +
-                    "ticket and requested permissions.", e);
-            permissionServiceException.setErrorCode(UMAConstants.ErrorCodes.INVALID_RESOURCE_ID);
-            throw permissionServiceException;
-        } catch (ResourceScopeDAOException e) {
-            log.error(UMAConstants.ErrorMessages.ERROR_MESSAGE_INVALID_RESOURCE_SCOPE, e);
-            permissionServiceException = new PermissionServiceException("Error occurred while persisting permission " +
-                    "ticket and requested permissions.", e);
-            permissionServiceException.setErrorCode(UMAConstants.ErrorCodes.INVALID_SCOPE);
-            throw permissionServiceException;
+            throw new UMAServerException(e.getCode(), e.getMessage(),e);
         }
+
+
+        //evaluating policy
+        //not needed for this
+        XACMLBasedAuthorization xacmlBasedAuthorization = new XACMLBasedAuthorization();
+        if(xacmlBasedAuthorization.isAuthorized()){
+            log.info("successful");
+        } else {
+            log.info("unsuccessful");
+        }
+
 
         return permissionTicketDO;
 

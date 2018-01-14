@@ -1,37 +1,21 @@
-/*
- * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
- *
- * WSO2 Inc. licenses this file to you under the Apache License,
- * Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied. See the License for the
- * specific language governing permissions and limitations
- * under the License.
- */
-
 package org.wso2.carbon.identity.oauth.uma.endpoint;
 
-import com.google.gson.Gson;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.base.IdentityConstants;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
-import org.wso2.carbon.identity.oauth.uma.endpoint.dto.ErrorDTO;
+import org.wso2.carbon.identity.oauth.uma.endpoint.dto.ErrorResponseDTO;
+import org.wso2.carbon.identity.oauth.uma.endpoint.dto.PermissionTicketResponseDTO;
 import org.wso2.carbon.identity.oauth.uma.endpoint.dto.ResourceModelDTO;
 import org.wso2.carbon.identity.oauth.uma.endpoint.dto.ResourceModelInnerDTO;
-import org.wso2.carbon.identity.oauth.uma.endpoint.dto.SuccessDTO;
+import org.wso2.carbon.identity.oauth.uma.endpoint.exception.PermissionEndpointException;
 import org.wso2.carbon.identity.oauth.uma.service.PermissionService;
-import org.wso2.carbon.identity.oauth.uma.service.dao.PermissionTicketDO;
-import org.wso2.carbon.identity.oauth.uma.service.exception.PermissionServiceException;
-import org.wso2.carbon.identity.oauth.uma.service.exception.PermissionServiceRuntimeException;
+import org.wso2.carbon.identity.oauth.uma.service.UMAConstants;
+import org.wso2.carbon.identity.oauth.uma.service.exception.UMAClientException;
+import org.wso2.carbon.identity.oauth.uma.service.exception.UMAException;
+import org.wso2.carbon.identity.oauth.uma.service.exception.UMAServerException;
+import org.wso2.carbon.identity.oauth.uma.service.model.PermissionTicketDO;
 import org.wso2.carbon.identity.oauth.uma.service.model.Resource;
 
 import java.util.ArrayList;
@@ -39,92 +23,57 @@ import java.util.List;
 import javax.ws.rs.core.Response;
 
 /**
- * PermissionApiServiceImpl is used to register permissions.
+ * PermissionApiServiceImpl is used to request permission ticket.
  */
 public class PermissionApiServiceImpl extends PermissionApiService {
 
+    private static Log log = LogFactory.getLog(org.wso2.carbon.identity.oauth.uma.endpoint.PermissionApiServiceImpl.class);
+    private List<Resource> resourceList;
 
-    private static Log log = LogFactory.getLog(PermissionApiServiceImpl.class);
-    //private List<Resource> resourceList = new ArrayList<>();
-
-    /**
-     * Register permissions requested by the resource server on client's behalf.
-     *
-     * @param resourceOwnerId     Identifies the owner of the requested resource(s).
-     * @param requestedPermission Permissions requested.
-     * @return Response with the created permission ticket.
-     */
     @Override
-    public Response registerPermission(String resourceOwnerId, ResourceModelDTO requestedPermission) {
+    public Response requestPermission(String PAT, ResourceModelDTO requestedPermission) {
         PermissionService permissionService = (PermissionService) PrivilegedCarbonContext.getThreadLocalCarbonContext()
                 .getOSGiService(PermissionService.class, null);
 
-        List<Resource> resourceList = new ArrayList<>();
+        if (requestedPermission == null) {
+            log.error("Empty request body.");
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
 
-        try {
-            for (ResourceModelInnerDTO resourceModelInnerDTO : requestedPermission) {
-                Resource resource = new Resource();
-                resource.setResourceId(resourceModelInnerDTO.getResource_id());
-                List<String> resourceScopesList = new ArrayList<>();
-                for (String scopeString : resourceModelInnerDTO.getResource_scopes()) {
-                    resourceScopesList.add(scopeString);
-                }
-                resource.setResourceScopes(resourceScopesList);
-                resourceList.add(resource);
-            }
-        } catch (Exception e) {
-            log.error("Invalid request. ", e);
-            return Response.serverError().build();
-        }
-        /*try {
-            getRequestedPermission(requestedPermission);
-        } catch (Exception e) {
-            log.error("Invalid request. ", e);
-            return Response.serverError().build();
-        }
-*/
+        getPermissionTicketRequest(requestedPermission);
+
         PermissionTicketDO permissionTicketDO = null;
 
         try {
             permissionTicketDO = permissionService.issuePermissionTicket(resourceList);
-        } catch (PermissionServiceException e) {
-            ErrorDTO errorDTO = new ErrorDTO();
-            errorDTO.setError(e.getErrorCode());
-            Gson gson = new Gson();
-            return Response.status(Response.Status.BAD_REQUEST).entity(gson.toJson(errorDTO)).build();
-            /*handleErrorResponse(Response.Status.BAD_REQUEST,
-                    Response.Status.BAD_REQUEST.getReasonPhrase(), e, false, log);*/
-        } catch (PermissionServiceRuntimeException e) {
-            log.error("Internal server error occurred. ", e);
-            return Response.serverError().build();
-            /*handleErrorResponse(Response.Status.INTERNAL_SERVER_ERROR,
-                    Response.Status.INTERNAL_SERVER_ERROR.getReasonPhrase(), e, true, log);*/
+        } catch (UMAClientException e) {
+            if (log.isDebugEnabled()) {
+                log.debug("Client error while requesting permission ticket.", e);
+            }
+            handleErrorResponse(e, log);
+        } catch (UMAServerException e) {
+            handleErrorResponse(Response.Status.INTERNAL_SERVER_ERROR, e, true, log);
         } catch (Throwable throwable) {
-            log.error("Internal server error occurred. ", throwable);
-            return Response.serverError().build();
+            handleErrorResponse(Response.Status.INTERNAL_SERVER_ERROR, throwable, true, log);
         }
 
-        SuccessDTO successDTO = new SuccessDTO();
-        successDTO.setTicket(permissionTicketDO.getTicket());
+        PermissionTicketResponseDTO permissionTicketResponseDTO = new PermissionTicketResponseDTO();
+        permissionTicketResponseDTO.setTicket(permissionTicketDO.getTicket());
 
         if (log.isDebugEnabled()) {
             if (IdentityUtil.isTokenLoggable(IdentityConstants.IdentityTokens.ACCESS_TOKEN)) {
-                log.debug("Permission Ticket created: " + successDTO.getTicket());
+                log.debug("Permission Ticket created: " + permissionTicketResponseDTO.getTicket());
             } else {
                 // Avoid logging token since its a sensitive information.
                 log.debug("Permission Ticket created.");
             }
         }
-
-        return Response.status(Response.Status.CREATED).entity(successDTO).build();
+        return Response.status(Response.Status.CREATED).entity(permissionTicketResponseDTO).build();
     }
 
-    /**
-     * @param resourceModelDTO An object array containing the requested permissions
-     */
-    /*private void getRequestedPermission(ResourceModelDTO resourceModelDTO) {
-
-        for (ResourceModelInnerDTO resourceModelInnerDTO : resourceModelDTO) {
+    private void getPermissionTicketRequest(ResourceModelDTO requestedPermission) {
+        resourceList = new ArrayList<>();
+        for (ResourceModelInnerDTO resourceModelInnerDTO : requestedPermission) {
             Resource resource = new Resource();
             resource.setResourceId(resourceModelInnerDTO.getResource_id());
             List<String> resourceScopesList = new ArrayList<>();
@@ -135,43 +84,68 @@ public class PermissionApiServiceImpl extends PermissionApiService {
             resourceList.add(resource);
         }
     }
-*/
-    /*public static void handleErrorResponse(Response.Status status, String message, Throwable throwable,
-                                           boolean isServerException, Log log)
+
+    private static void handleErrorResponse(UMAException umaException, Log log) throws PermissionEndpointException {
+
+        String code = umaException.getCode();
+
+        String statusCode;
+        String errorCode = null;
+        Response.Status status = Response.Status.INTERNAL_SERVER_ERROR;
+        boolean isStatusOnly = true;
+
+        if (code != null) {
+            org.wso2.carbon.identity.oauth.uma.endpoint.PermissionEndpointConstants.getResponseDataMap();
+            if (org.wso2.carbon.identity.oauth.uma.endpoint.PermissionEndpointConstants.responseDataMap.containsKey(code)) {
+                statusCode = org.wso2.carbon.identity.oauth.uma.endpoint.PermissionEndpointConstants.responseDataMap.get(code)[0];
+                errorCode = org.wso2.carbon.identity.oauth.uma.endpoint.PermissionEndpointConstants.responseDataMap.get(code)[1];
+                status = Response.Status.fromStatusCode(Integer.parseInt(statusCode));
+                isStatusOnly = false;
+            }
+        }
+
+        throw buildPermissionEndpointException(status, errorCode, umaException.getMessage(), isStatusOnly);
+    }
+
+    /**
+     * Logs the error, builds a PermissionEndpointException with specified details and throws it.
+     *
+     * @param status    response status
+     * @param throwable throwable
+     * @throws PermissionEndpointException
+     */
+    private static void handleErrorResponse(Response.Status status, Throwable throwable,
+                                            boolean isServerException, Log log)
             throws PermissionEndpointException {
 
-        String errorCode = null;
-        if (throwable instanceof PermissionServiceException) {
-            errorCode = ((PermissionServiceException) throwable).getErrorCode();
+        String code;
+        if (throwable instanceof UMAException) {
+            code = ((UMAException) throwable).getCode();
         } else {
-            errorCode = UMAConstants.ErrorMessages.ERROR_CODE_UNEXPECTED;
+            code = UMAConstants.ErrorMessage.ERROR_UNEXPECTED.getCode();
         }
 
         if (isServerException) {
             if (throwable == null) {
-                log.error(message);
+                log.error(status.getReasonPhrase());
             } else {
-                log.error(message, throwable);
+                log.error(status.getReasonPhrase(), throwable);
             }
         }
-        throw buildScopeEndpointException(status, errorCode, isServerException);
-    }*/
-
-    /*private static PermissionEndpointException buildScopeEndpointException(Response.Status status, String error,
-                                                                           boolean isServerException) {
-        ErrorDTO errorDTO = getErrorDTO(error);
-        if (isServerException) {
-            return new PermissionEndpointException(status);
-        } else {
-            return new PermissionEndpointException(status, errorDTO);
-        }
+        throw buildPermissionEndpointException(status, code, throwable == null ? "" : throwable.getMessage(),
+                isServerException);
     }
 
-    public static ErrorDTO getErrorDTO(String error) {
-        ErrorDTO errorDTO = new ErrorDTO();
-        errorDTO.setError(error);
-//        errorDTO.setErrorDescription(errorDescription);
-//        errorDTO.setErrorUri(errorUri);
-        return errorDTO;
-    }*/
+    private static PermissionEndpointException buildPermissionEndpointException(Response.Status status,
+                                                                                String errorCode, String description,
+                                                                                boolean isStatusOnly) {
+        if (isStatusOnly) {
+            return new PermissionEndpointException(status);
+        } else {
+            ErrorResponseDTO errorResponseDTO = new ErrorResponseDTO();
+            errorResponseDTO.setError(errorCode);
+            errorResponseDTO.setErrorDescription(description);
+            return new PermissionEndpointException(status, errorResponseDTO);
+        }
+    }
 }

@@ -18,7 +18,7 @@
 
 package org.wso2.carbon.identity.oauth.uma.endpoint.exception;
 
-import org.wso2.carbon.identity.oauth.uma.endpoint.dto.ErrorDTO;
+import org.wso2.carbon.identity.oauth.uma.endpoint.dto.ErrorResponseDTO;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
@@ -28,9 +28,9 @@ import javax.ws.rs.core.Response;
  */
 public class PermissionEndpointException extends WebApplicationException {
 
-    public PermissionEndpointException(Response.Status status, ErrorDTO errorDTO) {
+    public PermissionEndpointException(Response.Status status, ErrorResponseDTO errorResponseDTO) {
         super(Response.status(status)
-                .entity(errorDTO)
+                .entity(errorResponseDTO)
                 .build());
     }
 

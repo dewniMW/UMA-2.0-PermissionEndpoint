@@ -21,28 +21,36 @@ package org.wso2.carbon.identity.oauth.uma.service.exception;
 import org.wso2.carbon.identity.oauth.uma.service.UMAConstants;
 
 /**
- * Custom exception to be thrown when there is an issue with persisting the permission ticket.
+ * Custom exception to be thrown when there is an issue with database.
  */
-public class PermissionTicketDAOException extends UMAException {
+public class PermissionDAOException extends UMAException {
 
-    public PermissionTicketDAOException(String message) {
+    public PermissionDAOException(String message) {
         super(message);
+
     }
 
-    public PermissionTicketDAOException(String message, Throwable throwable) {
+    public PermissionDAOException(String message, Throwable throwable) {
         super(message, throwable);
+
     }
 
-    public PermissionTicketDAOException (UMAConstants.ErrorMessage errorMessage, Throwable throwable){
+    public PermissionDAOException(UMAConstants.ErrorMessages errorMessages) {
+        super(errorMessages.getMessage());
+
+    }
+
+    public PermissionDAOException (UMAConstants.ErrorMessages errorMessages, Throwable throwable){
+        super(errorMessages.getMessage(), throwable);
+    }
+
+
+    public PermissionDAOException (UMAConstants.ErrorMessage errorMessage, Throwable throwable){
         super(errorMessage.getMessageyo(), throwable);
         this.setCode(errorMessage.getCode());
 
     }
 
-    public PermissionTicketDAOException (UMAConstants.ErrorMessage errorMessage){
-        super(errorMessage.getMessageyo());
-        this.setCode(errorMessage.getCode());
 
-    }
 }
 

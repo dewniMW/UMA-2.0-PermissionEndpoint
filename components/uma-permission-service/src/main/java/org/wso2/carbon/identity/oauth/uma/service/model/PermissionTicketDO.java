@@ -16,9 +16,8 @@
  * under the License.
  */
 
-package org.wso2.carbon.identity.oauth.uma.service.dao;
+package org.wso2.carbon.identity.oauth.uma.service.model;
 
-import java.sql.Timestamp;
 import java.util.Calendar;
 
 /**
@@ -28,7 +27,7 @@ public class PermissionTicketDO {
 
     private String ticket;
     private String status;
-    private Timestamp timestamp;
+    //private Timestamp timestamp;
     private Calendar createdTime;
     private long validityPeriod;
 

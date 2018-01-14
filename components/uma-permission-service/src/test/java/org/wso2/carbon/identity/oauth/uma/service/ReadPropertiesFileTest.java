@@ -19,23 +19,13 @@
 package org.wso2.carbon.identity.oauth.uma.service;
 
 import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.testng.IObjectFactory;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.ObjectFactory;
-import org.testng.annotations.Test;
-import org.wso2.carbon.identity.oauth.uma.service.model.PermissionTicketValues;
 import org.wso2.carbon.utils.CarbonUtils;
 
-import java.io.IOException;
 import java.nio.file.Paths;
-
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
-import static org.powermock.api.mockito.PowerMockito.when;
 
 @PrepareForTest({CarbonUtils.class, Paths.class})
 public class ReadPropertiesFileTest {
-    @BeforeMethod
+    /*@BeforeMethod
     public void setUp() throws Exception {
     }
 
@@ -78,5 +68,5 @@ public class ReadPropertiesFileTest {
 
 
     }
-
+*/
 }

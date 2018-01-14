@@ -11,7 +11,7 @@ import javax.validation.constraints.NotNull;
 
 
 @ApiModel(description = "")
-public class SuccessDTO  {
+public class PermissionTicketResponseDTO  {
   
   
   @NotNull
@@ -35,7 +35,7 @@ public class SuccessDTO  {
   @Override
   public String toString()  {
     StringBuilder sb = new StringBuilder();
-    sb.append("class SuccessDTO {\n");
+    sb.append("class PermissionTicketResponseDTO {\n");
     
     sb.append("  ticket: ").append(ticket).append("\n");
     sb.append("}\n");

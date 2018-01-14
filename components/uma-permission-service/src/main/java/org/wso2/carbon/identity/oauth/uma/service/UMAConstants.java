@@ -21,25 +21,76 @@ package org.wso2.carbon.identity.oauth.uma.service;
 /**
  * This class holds the constants used by Permission Endpoint.
  */
-public final class UMAConstants {
+public class UMAConstants {
 
     public static final String UMA_PERMISSION_ENDPOINT_CONFIG_PATH = "ptDetails.properties";
 
-    /**
-     * Contains error messages to be logged when an invalid body parameter is sent in the request body.
-     */
-    public static class ErrorMessages {
-        public static final String ERROR_MESSAGE_INVALID_RESOURCE_ID = "Invalid resource id.";
-        public static final String ERROR_MESSAGE_INVALID_RESOURCE_SCOPE = "Invalid resource scope.";
-        public static final String ERROR_CODE_UNEXPECTED = "Unexpected error.";
-    }
 
     /**
      * Contains the values to be sent in body of the response as a JSON Result as specified in spec when an error
      * occurs.
      */
-    public static class ErrorCodes {
-        public static final String INVALID_RESOURCE_ID = "invalid_resource_id";
-        public static final String INVALID_SCOPE = "invalid_scope";
+    public enum ErrorCodes {
+        invalid_resource_id,
+        invalid_scope;
+    }
+
+    /**
+     * Contains error messages to be logged when an invalid body parameter is sent in the request body.
+     */
+    public enum ErrorMessages {
+
+        ERROR_MESSAGE_INVALID_RESOURCE_ID("Permission request failed with bad resource ID."),
+        ERROR_MESSAGE_INVALID_RESOURCE_SCOPE("Permission request failed with bad resource scope."),
+        ERROR_MESSAGE_PERSISTING_PT_DETAILS("Error occurred while storing PT details."),
+        ERROR_MESSAGE_PERSISTING_PT("Error occurred while persisting PT.");
+
+
+        private final String message;
+
+        ErrorMessages(String message) {
+            this.message = message;
+        }
+
+        public String getMessage() {
+            return message;
+        }
+
+    }
+
+
+    public enum ErrorMessage {
+        ERROR_BAD_REQUEST_INVALID_RESOURCE_ID("6001","Permission request failed with bad resource ID."),
+        ERROR_BAD_REQUEST_INVALID_RESOURCE_SCOPE("6002", "Permission request failed with bad resource scope."),
+        ERROR_INTERNAL_SERVER_ERROR_FAILED_TO_PERSIST_PT("6003", "Error occurred while persisting PT."),
+        ERROR_INTERNAL_SERVER_ERROR_FAILED_TO_PERSIST_PT_DETAILS("6004", "Error occurred while storing PT details."),
+        ERROR_UNEXPECTED("6005", "Unexpected error.");
+
+        private final String code;
+        private final String messageyo;
+
+
+        ErrorMessage(String code, String messageyo) {
+
+            this.code = code;
+            this.messageyo = messageyo;
+        }
+
+        public String getCode() {
+
+            return this.code;
+        }
+
+        public String getMessageyo() {
+
+            return this.messageyo;
+        }
+
+        @Override
+        public String toString() {
+
+            return code + " - " + messageyo;
+        }
+
     }
 }
