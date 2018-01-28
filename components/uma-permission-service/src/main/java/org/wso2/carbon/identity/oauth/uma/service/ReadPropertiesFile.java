@@ -20,7 +20,7 @@ package org.wso2.carbon.identity.oauth.uma.service;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.identity.oauth.uma.service.model.PermissionTicketValues;
+import org.wso2.carbon.identity.oauth.uma.service.model.PermissionTicketDO;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import java.io.File;
@@ -34,20 +34,22 @@ import java.util.Properties;
  * ReadPropertiesFile is used to read configuration values from a properties file which is
  *required for a permission ticket generation.
  */
+//TODO: Move this configuration to identity.xml
 public class ReadPropertiesFile {
 
     private static Log log = LogFactory.getLog(ReadPropertiesFile.class);
 
     /**
-     * @param permissionTicketValues Configuration values for permission ticket
+     * @param permissionTicketDO Configuration values for permission ticket
      */
-    public static void readFileConfigValues(PermissionTicketValues permissionTicketValues) {
+    public static void readFileConfigValues(PermissionTicketDO permissionTicketDO) {
         String configDirPath = CarbonUtils.getCarbonConfigDirPath();
-        String confPath = Paths.get(configDirPath, "uma", UMAConstants.UMA_PERMISSION_ENDPOINT_CONFIG_PATH)
+        String confPath = Paths.get(configDirPath, "uma2", UMAConstants.UMA_PERMISSION_ENDPOINT_CONFIG_PATH)
                 .toString();
         File configfile = new File(confPath);
         if (!configfile.exists()) {
             log.warn("File is not present at: " + confPath);
+            permissionTicketDO.setValidityPeriod(1000000);
         }
 
         Properties prop = new Properties();
@@ -60,9 +62,8 @@ public class ReadPropertiesFile {
             prop.load(input);
 
             // get the property values
-            permissionTicketValues.setStatus(prop.getProperty("status"));
             long validityTimePeriod = Long.parseLong(prop.getProperty("validityperiod"));
-            permissionTicketValues.setValidityPeriod(validityTimePeriod);
+            permissionTicketDO.setValidityPeriod(validityTimePeriod);
         } catch (IOException e) {
             log.error("Configuration values for permission ticket not found in the properties file. ", e);
         } finally {

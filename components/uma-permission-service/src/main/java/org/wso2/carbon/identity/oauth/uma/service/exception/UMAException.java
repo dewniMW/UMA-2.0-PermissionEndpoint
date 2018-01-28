@@ -23,17 +23,13 @@ package org.wso2.carbon.identity.oauth.uma.service.exception;
  */
 public class UMAException extends Exception {
 
-    /*private String errorCode = null;
-    private int statusCode;
-    private String errorDescription = null;*/
-
     private String code = null;
 
     public UMAException(String message) {
         super(message);
     }
 
-    public UMAException(Throwable throwable){
+    public UMAException(Throwable throwable) {
         super(throwable);
     }
 
@@ -41,30 +37,10 @@ public class UMAException extends Exception {
         super(message, throwable);
     }
 
-   /* public UMAException (String errorCode, String message) {
-        super (message);
-        this.errorCode = errorCode;
-    }*/
-
-    public UMAException (String code,String message, Throwable throwable){
+    public UMAException(String code, String message, Throwable throwable) {
         super(message, throwable);
         this.code = code;
     }
-
-
-    /*public UMAException (String errorCode, UMAConstants.ErrorMessages errorMessages2, Throwable throwable){
-        super(errorMessages2.getMessage(), throwable);
-        this.errorCode = errorCode;
-    }
-
-
-    public String getErrorCode() {
-        return errorCode;
-    }
-
-    public void setErrorCode(String errorCode) {
-        this.errorCode = errorCode;
-    }*/
 
     public String getCode() {
         return code;
@@ -73,40 +49,4 @@ public class UMAException extends Exception {
     public void setCode(String code) {
         this.code = code;
     }
-
-    /*public int getStatusCode() {
-        return statusCode;
-    }
-
-    public void setStatusCode(int statusCode) {
-        this.statusCode = statusCode;
-    }
-
-    public String getErrorDescription() {
-        return errorDescription;
-    }
-
-    public void setErrorDescription(String errorDescription) {
-        this.errorDescription = errorDescription;
-    }*/
-
-
-    /*public UMAException(String message) {
-        super(message);
-    }
-
-    public UMAException (String errorCode, String message) {
-        super (message);
-        this.errorCode = errorCode;
-    }
-
-    public UMAException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public UMAException(String errorCode, String message, Throwable cause) {
-        super(message, cause);
-        this.errorCode = errorCode;
-    }*/
-
 }

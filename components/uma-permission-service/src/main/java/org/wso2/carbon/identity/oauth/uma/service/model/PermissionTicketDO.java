@@ -30,6 +30,7 @@ public class PermissionTicketDO {
     //private Timestamp timestamp;
     private Calendar createdTime;
     private long validityPeriod;
+    private String tenentId;
 
     public String getTicket() {
         return ticket;
@@ -61,6 +62,14 @@ public class PermissionTicketDO {
 
     public void setCreatedTime(Calendar createdTime) {
         this.createdTime = createdTime;
+    }
+
+    public String getTenentId() {
+        return tenentId;
+    }
+
+    public void setTenentId(String tenentId) {
+        this.tenentId = tenentId;
     }
 
     /*public Timestamp getTimestamp() {

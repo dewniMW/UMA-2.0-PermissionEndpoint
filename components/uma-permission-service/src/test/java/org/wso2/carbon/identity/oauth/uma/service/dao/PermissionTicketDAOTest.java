@@ -19,8 +19,27 @@
 package org.wso2.carbon.identity.oauth.uma.service.dao;
 
 import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.testng.IObjectFactory;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.ObjectFactory;
+import org.testng.annotations.Test;
 import org.wso2.carbon.identity.core.util.IdentityDatabaseUtil;
 import org.wso2.carbon.identity.oauth.uma.service.dao.utils.DAOUtils;
+import org.wso2.carbon.identity.oauth.uma.service.exception.UMAException;
+import org.wso2.carbon.identity.oauth.uma.service.model.PermissionTicketDO;
+import org.wso2.carbon.identity.oauth.uma.service.model.Resource;
+
+import java.sql.Connection;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
+import java.util.TimeZone;
+import java.util.UUID;
+
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
+import static org.powermock.api.mockito.PowerMockito.when;
 
 /**
  * Unit tests for PermissionTicketDAO.
@@ -28,7 +47,7 @@ import org.wso2.carbon.identity.oauth.uma.service.dao.utils.DAOUtils;
 @PrepareForTest(IdentityDatabaseUtil.class)
 public class PermissionTicketDAOTest extends DAOUtils {
 
-    /*private static final String DB_NAME = "UMA_DB";
+    private static final String DB_NAME = "UMA_DB";
 
     private PermissionTicketDAO permissionTicketDAO;
 
@@ -66,10 +85,10 @@ public class PermissionTicketDAOTest extends DAOUtils {
         }
     }
 
-    *//**
+    /**
      * Test persisting a permission with an invalid resource id.
-     *//*
-    @Test(expectedExceptions = ResourceIdDAOException.class)
+     */
+    @Test(expectedExceptions = UMAException.class)//(expectedExceptions = ResourceIdDAOException.class)
     public void testPersistInvalidResourceId() throws Exception {
         mockStatic(IdentityDatabaseUtil.class);
         try (Connection connection = DAOUtils.getConnection(DB_NAME)) {
@@ -83,10 +102,10 @@ public class PermissionTicketDAOTest extends DAOUtils {
         }
     }
 
-    *//**
+    /**
      * Test persisting a permission with an invalid resource scope.
-     *//*
-    @Test(expectedExceptions = ResourceScopeDAOException.class)
+     */
+    @Test(expectedExceptions = UMAException.class)//(expectedExceptions = ResourceScopeDAOException.class)
     public void testPersistInvalidResourceScope() throws Exception {
         mockStatic(IdentityDatabaseUtil.class);
         try (Connection connection = DAOUtils.getConnection(DB_NAME)) {
@@ -98,10 +117,10 @@ public class PermissionTicketDAOTest extends DAOUtils {
         }
     }
 
-    *//**
+    /**
      * Test persisting an empty resource or empty permission ticket
-     *//*
-    @Test(expectedExceptions = PermissionAPIException.class)
+     */
+    @Test(expectedExceptions = UMAException.class)//(expectedExceptions = PermissionAPIException.class)
     public void testPersistEmptyPermission() throws Exception {
         mockStatic(IdentityDatabaseUtil.class);
         try (Connection connection = DAOUtils.getConnection(DB_NAME)) {
@@ -150,5 +169,5 @@ public class PermissionTicketDAOTest extends DAOUtils {
         resourceScopeList.add("scope02");
         resource.setResourceScopes(resourceScopeList);
         return resource;
-    }*/
+    }
 }

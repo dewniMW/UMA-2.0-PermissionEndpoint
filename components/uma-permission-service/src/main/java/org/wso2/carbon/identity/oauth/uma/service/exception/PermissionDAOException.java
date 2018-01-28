@@ -27,20 +27,19 @@ public class PermissionDAOException extends UMAException {
 
     public PermissionDAOException(String message) {
         super(message);
-
     }
 
     public PermissionDAOException(String message, Throwable throwable) {
         super(message, throwable);
-
     }
 
-    public PermissionDAOException (UMAConstants.ErrorMessages errorMessage, Throwable throwable){
+    public PermissionDAOException(UMAConstants.ErrorMessages errorMessage, Throwable throwable) {
         super(errorMessage.getMessage(), throwable);
         this.setCode(errorMessage.getCode());
-
     }
 
-
+    public PermissionDAOException(UMAConstants.ErrorMessages errorMessage) {
+        super(errorMessage.getMessage());
+        this.setCode(errorMessage.getCode());
+    }
 }
-

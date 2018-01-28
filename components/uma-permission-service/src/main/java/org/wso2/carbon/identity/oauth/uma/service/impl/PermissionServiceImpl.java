@@ -22,14 +22,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.identity.oauth.uma.service.PermissionService;
 import org.wso2.carbon.identity.oauth.uma.service.ReadPropertiesFile;
-import org.wso2.carbon.identity.oauth.uma.service.dao.PermissionTicketDAO;
+import org.wso2.carbon.identity.oauth.uma.service.dao.PermissionTicketDAO2;
 import org.wso2.carbon.identity.oauth.uma.service.exception.PermissionDAOException;
-import org.wso2.carbon.identity.oauth.uma.service.exception.PermissionTicketDAOException;
-import org.wso2.carbon.identity.oauth.uma.service.exception.UMAServerException;
-import org.wso2.carbon.identity.oauth.uma.service.exception.UMAClientException;
 import org.wso2.carbon.identity.oauth.uma.service.exception.UMAResourceException;
 import org.wso2.carbon.identity.oauth.uma.service.model.PermissionTicketDO;
-import org.wso2.carbon.identity.oauth.uma.service.model.PermissionTicketValues;
 import org.wso2.carbon.identity.oauth.uma.service.model.Resource;
 import org.wso2.carbon.identity.xacmlEXP1.impl.XACMLBasedAuthorization;
 
@@ -45,50 +41,33 @@ public class PermissionServiceImpl implements PermissionService {
 
     private static Log log = LogFactory.getLog(PermissionServiceImpl.class);
     private static final String UTC = "UTC";
-    private PermissionTicketDAO permissionTicketDAO = new PermissionTicketDAO();
 
     @Override
-    public PermissionTicketDO issuePermissionTicket(List<Resource> resourceList) throws UMAClientException, UMAServerException {
+    public PermissionTicketDO issuePermissionTicket(List<Resource> resourceList) throws UMAResourceException,
+            PermissionDAOException {
 
-        /*PermissionTicketDAO permissionTicketDAO = new PermissionTicketDAO();*/
         PermissionTicketDO permissionTicketDO = new PermissionTicketDO();
 
-        PermissionTicketValues permissionTicketValues = new PermissionTicketValues();
+        ReadPropertiesFile.readFileConfigValues(permissionTicketDO);
 
-        ReadPropertiesFile.readFileConfigValues(permissionTicketValues);
-
+        //TODO: Make this an extension point.
         String ticketString = UUID.randomUUID().toString();
         permissionTicketDO.setTicket(ticketString);
-        //permissionTicketDO.setTimestamp(new Timestamp(new Date().getTime()));
         permissionTicketDO.setCreatedTime(Calendar.getInstance(TimeZone.getTimeZone(UTC)));
-        permissionTicketDO.setValidityPeriod(permissionTicketValues.getValidityPeriod());
-        permissionTicketDO.setStatus(permissionTicketValues.getStatus());
+        permissionTicketDO.setStatus("ACTIVE");
+        permissionTicketDO.setTenentId("1234");
 
-
-        try {
-            permissionTicketDAO.persist(resourceList, permissionTicketDO);
-        } catch (UMAResourceException e){
-            //throw new UMAClientException(400, e.getErrorCode(), e.getMessage(), e);
-            throw new UMAClientException( e.getCode(),e.getMessage(), e);
-        } catch (PermissionDAOException e) {
-            //throw new UMAServerException(e.getMessage(),e);
-            throw new UMAServerException(e.getCode(), e.getMessage(),e);
-        } catch (PermissionTicketDAOException e) {
-            throw new UMAServerException(e.getCode(), e.getMessage(),e);
-        }
-
+        PermissionTicketDAO2.persistPTandRequestedPermissions(resourceList, permissionTicketDO);
 
         //evaluating policy
-        //not needed for this
+        //not needed
         XACMLBasedAuthorization xacmlBasedAuthorization = new XACMLBasedAuthorization();
-        if(xacmlBasedAuthorization.isAuthorized()){
+        if (xacmlBasedAuthorization.isAuthorized()) {
             log.info("successful");
         } else {
             log.info("unsuccessful");
         }
 
-
         return permissionTicketDO;
-
     }
 }

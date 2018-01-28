@@ -45,5 +45,4 @@ public class Resource {
     public void setResourceScopes(List<String> resourceScopes) {
         this.resourceScopes = resourceScopes;
     }
-
 }

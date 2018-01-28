@@ -27,71 +27,19 @@ public class UMAResourceException extends UMAException {
 
     public UMAResourceException(String message) {
         super(message);
-//        this.setErrorCode(getDefaultErrorCode());
     }
 
     public UMAResourceException(String message, Throwable throwable) {
         super(message, throwable);
-//        this.setErrorCode(getDefaultErrorCode());
     }
 
-    /*public UMAResourceException(String errorCode, String message) {
-        super (errorCode, message);
-
-    }*/
-
-    /*public UMAResourceException(String errorCode, String message, Throwable throwable){
-        super(message, throwable);
-        this.setErrorCode(errorCode);
-    }
-
-    public UMAResourceException (String errorCode, UMAConstants.ErrorMessages errorMessages, Throwable throwable){
-        super(errorMessages.getMessage(), throwable);
-        this.setErrorCode(errorCode);
-    }*/
-
-    public UMAResourceException (UMAConstants.ErrorMessages errorMessage, Throwable throwable){
+    public UMAResourceException(UMAConstants.ErrorMessages errorMessage, Throwable throwable) {
         super(errorMessage.getMessage(), throwable);
         this.setCode(errorMessage.getCode());
-
     }
 
-
-
-    /*public static DCRMClientException generateClientException(DCRMConstants.ErrorMessages error,
-                                                              String data)
-            throws DCRMClientException {
-
-        String errorDescription;
-        if (StringUtils.isNotBlank(data)) {
-            errorDescription = String.format(error.getMessage(), data);
-        } else {
-            errorDescription = error.getMessage();
-        }
-
-        return IdentityException.error(DCRMClientException.class, error.toString(), errorDescription);
+    public UMAResourceException(UMAConstants.ErrorMessages errorMessage) {
+        super(errorMessage.getMessage());
+        this.setCode(errorMessage.getCode());
     }
-    */
-
-
-    /*private String getDefaultErrorCode() {
-
-        String errorCode = super.getErrorCode();
-        if (StringUtils.isEmpty(errorCode)) {
-            //TODO define error codes for DCRM
-//            errorCode = Oauth2ScopeConstants.ErrorMessages.ERROR_CODE_UNEXPECTED.getCode();
-        }
-        return errorCode;
-    }
-
-    private String getDefaultStatusCode() {
-
-        String errorCode = super.getErrorCode();
-        if (StringUtils.isEmpty(errorCode)) {
-            //TODO define error codes for DCRM
-//            errorCode = Oauth2ScopeConstants.ErrorMessages.ERROR_CODE_UNEXPECTED.getCode();
-        }
-        return errorCode;
-    }*/
-
 }

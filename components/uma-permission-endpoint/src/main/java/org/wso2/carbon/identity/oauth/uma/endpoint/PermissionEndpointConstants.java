@@ -27,19 +27,11 @@ import java.util.Map;
  */
 public final class PermissionEndpointConstants {
 
-    public static final Map<String, String[]> responseDataMap = new HashMap<String, String[]>();
+    public static final Map<String, String[]> RESPONSE_DATA_MAP = new HashMap<String, String[]>() { {
+        put("6001", new String[]{"400", "invalid_resource_id"});
+        put("6002", new String[]{"400", "invalid_scope"});
+    }};
 
-    public static void getResponseDataMap() {
 
-        String id;
-
-        String[] invalidResourceIdArray = new String[]{"400", "invalid_resource_id"};
-        id = "6001";
-        responseDataMap.put(id, invalidResourceIdArray);
-
-        String[] invalidResourceScopeArray = new String[]{"400", "invalid_scope"};
-        id = "6002";
-        responseDataMap.put(id, invalidResourceScopeArray);
-    }
-
+//Todo: get status code and error code from here
 }

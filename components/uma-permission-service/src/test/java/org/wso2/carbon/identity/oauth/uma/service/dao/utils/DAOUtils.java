@@ -18,12 +18,23 @@
 
 package org.wso2.carbon.identity.oauth.uma.service.dao.utils;
 
+import org.apache.commons.dbcp.BasicDataSource;
+import org.apache.commons.lang.StringUtils;
+
+import java.nio.file.Paths;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * DB Utils.
  */
 public class DAOUtils {
 
-/*
+
     private static Map<String, BasicDataSource> dataSourceMap = new HashMap<>();
 
     private static final String STORE_RESOURCE_QUERY = "INSERT INTO IDN_RESOURCE (ID, RESOURCE_ID, RESOURCE_NAME, " +
@@ -173,6 +184,6 @@ public class DAOUtils {
             }
         }
     }
-*/
+
 
 }

@@ -35,5 +35,4 @@ public class PermissionServiceComponent {
     protected void activate(BundleContext bundleContext) {
         bundleContext.registerService(PermissionService.class.getName(), new PermissionServiceImpl(), null);
     }
-
 }

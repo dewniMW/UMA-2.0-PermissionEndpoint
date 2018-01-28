@@ -1,9 +1,26 @@
+/*
+ * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package org.wso2.carbon.identity.oauth.uma.endpoint;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.identity.base.IdentityConstants;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.oauth.uma.endpoint.dto.ErrorResponseDTO;
 import org.wso2.carbon.identity.oauth.uma.endpoint.dto.PermissionTicketResponseDTO;
@@ -12,9 +29,9 @@ import org.wso2.carbon.identity.oauth.uma.endpoint.dto.ResourceModelInnerDTO;
 import org.wso2.carbon.identity.oauth.uma.endpoint.exception.PermissionEndpointException;
 import org.wso2.carbon.identity.oauth.uma.service.PermissionService;
 import org.wso2.carbon.identity.oauth.uma.service.UMAConstants;
-import org.wso2.carbon.identity.oauth.uma.service.exception.UMAClientException;
+import org.wso2.carbon.identity.oauth.uma.service.exception.PermissionDAOException;
 import org.wso2.carbon.identity.oauth.uma.service.exception.UMAException;
-import org.wso2.carbon.identity.oauth.uma.service.exception.UMAServerException;
+import org.wso2.carbon.identity.oauth.uma.service.exception.UMAResourceException;
 import org.wso2.carbon.identity.oauth.uma.service.model.PermissionTicketDO;
 import org.wso2.carbon.identity.oauth.uma.service.model.Resource;
 
@@ -27,11 +44,10 @@ import javax.ws.rs.core.Response;
  */
 public class PermissionApiServiceImpl extends PermissionApiService {
 
-    private static Log log = LogFactory.getLog(org.wso2.carbon.identity.oauth.uma.endpoint.PermissionApiServiceImpl.class);
-    private List<Resource> resourceList;
+    private static Log log = LogFactory.getLog(PermissionApiServiceImpl.class);
 
     @Override
-    public Response requestPermission(String PAT, ResourceModelDTO requestedPermission) {
+    public Response requestPermission(String pat, ResourceModelDTO requestedPermission) {
         PermissionService permissionService = (PermissionService) PrivilegedCarbonContext.getThreadLocalCarbonContext()
                 .getOSGiService(PermissionService.class, null);
 
@@ -40,28 +56,23 @@ public class PermissionApiServiceImpl extends PermissionApiService {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
 
-        getPermissionTicketRequest(requestedPermission);
-
         PermissionTicketDO permissionTicketDO = null;
-
         try {
-            permissionTicketDO = permissionService.issuePermissionTicket(resourceList);
-        } catch (UMAClientException e) {
-            if (log.isDebugEnabled()) {
-                log.debug("Client error while requesting permission ticket.", e);
-            }
-            handleErrorResponse(e, log);
-        } catch (UMAServerException e) {
-            handleErrorResponse(Response.Status.INTERNAL_SERVER_ERROR, e, true, log);
+            permissionTicketDO = permissionService.issuePermissionTicket(getPermissionTicketRequest(
+                    requestedPermission));
+        } catch (UMAResourceException e) {
+            handleErrorResponse3(e, false, log);
+        }  catch (PermissionDAOException e) {
+            handleErrorResponse3(e, true, log);
         } catch (Throwable throwable) {
-            handleErrorResponse(Response.Status.INTERNAL_SERVER_ERROR, throwable, true, log);
+            handleErrorResponse3(throwable, true, log);
         }
 
         PermissionTicketResponseDTO permissionTicketResponseDTO = new PermissionTicketResponseDTO();
         permissionTicketResponseDTO.setTicket(permissionTicketDO.getTicket());
 
         if (log.isDebugEnabled()) {
-            if (IdentityUtil.isTokenLoggable(IdentityConstants.IdentityTokens.ACCESS_TOKEN)) {
+            if (IdentityUtil.isTokenLoggable("permission ticket")) {
                 log.debug("Permission Ticket created: " + permissionTicketResponseDTO.getTicket());
             } else {
                 // Avoid logging token since its a sensitive information.
@@ -71,8 +82,8 @@ public class PermissionApiServiceImpl extends PermissionApiService {
         return Response.status(Response.Status.CREATED).entity(permissionTicketResponseDTO).build();
     }
 
-    private void getPermissionTicketRequest(ResourceModelDTO requestedPermission) {
-        resourceList = new ArrayList<>();
+    private List<Resource> getPermissionTicketRequest(ResourceModelDTO requestedPermission) {
+        List<Resource> resourceList = new ArrayList<>();
         for (ResourceModelInnerDTO resourceModelInnerDTO : requestedPermission) {
             Resource resource = new Resource();
             resource.setResourceId(resourceModelInnerDTO.getResource_id());
@@ -83,42 +94,16 @@ public class PermissionApiServiceImpl extends PermissionApiService {
             resource.setResourceScopes(resourceScopesList);
             resourceList.add(resource);
         }
+        return resourceList;
     }
 
-    private static void handleErrorResponse(UMAException umaException, Log log) throws PermissionEndpointException {
-
-        String code = umaException.getCode();
-
-        String statusCode;
-        String errorCode = null;
-        Response.Status status = Response.Status.INTERNAL_SERVER_ERROR;
-        boolean isStatusOnly = true;
-
-        if (code != null) {
-            org.wso2.carbon.identity.oauth.uma.endpoint.PermissionEndpointConstants.getResponseDataMap();
-            if (org.wso2.carbon.identity.oauth.uma.endpoint.PermissionEndpointConstants.responseDataMap.containsKey(code)) {
-                statusCode = org.wso2.carbon.identity.oauth.uma.endpoint.PermissionEndpointConstants.responseDataMap.get(code)[0];
-                errorCode = org.wso2.carbon.identity.oauth.uma.endpoint.PermissionEndpointConstants.responseDataMap.get(code)[1];
-                status = Response.Status.fromStatusCode(Integer.parseInt(statusCode));
-                isStatusOnly = false;
-            }
-        }
-
-        throw buildPermissionEndpointException(status, errorCode, umaException.getMessage(), isStatusOnly);
-    }
-
-    /**
-     * Logs the error, builds a PermissionEndpointException with specified details and throws it.
-     *
-     * @param status    response status
-     * @param throwable throwable
-     * @throws PermissionEndpointException
-     */
-    private static void handleErrorResponse(Response.Status status, Throwable throwable,
-                                            boolean isServerException, Log log)
+    public static void handleErrorResponse3(Throwable throwable, boolean isServerException, Log log)
             throws PermissionEndpointException {
 
         String code;
+        String errorCode = null;
+        Response.Status status = Response.Status.INTERNAL_SERVER_ERROR;
+        boolean isStatusOnly = true;
         if (throwable instanceof UMAException) {
             code = ((UMAException) throwable).getCode();
         } else {
@@ -131,9 +116,19 @@ public class PermissionApiServiceImpl extends PermissionApiService {
             } else {
                 log.error(status.getReasonPhrase(), throwable);
             }
+        } else {
+            log.error("Client error while requesting permission ticket.", throwable);
+            if (code != null) {
+                if (PermissionEndpointConstants.RESPONSE_DATA_MAP.containsKey(code)) {
+                    String statusCode = PermissionEndpointConstants.RESPONSE_DATA_MAP.get(code)[0];
+                    errorCode = PermissionEndpointConstants.RESPONSE_DATA_MAP.get(code)[1];
+                    status = Response.Status.fromStatusCode(Integer.parseInt(statusCode));
+                    isStatusOnly = false;
+                }
+            }
         }
-        throw buildPermissionEndpointException(status, code, throwable == null ? "" : throwable.getMessage(),
-                isServerException);
+        throw buildPermissionEndpointException(status, errorCode, throwable == null ? "" : throwable.getMessage(),
+                isStatusOnly);
     }
 
     private static PermissionEndpointException buildPermissionEndpointException(Response.Status status,
